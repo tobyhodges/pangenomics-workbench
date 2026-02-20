@@ -1,144 +1,138 @@
 ---
-title: "Interactive Pangenome Plots"
+title: Interactive Pangenome Plots
 teaching: 20
 exercises: 10
-questions:
-- "How can I obtain an interactive pangenome plot?"
-- "How can I measure the homogeneity of the gene families?"
-- "How to obtain an enrichment analysis of the gene families?"
-- "How to compute the ANI values between the genomes of the pangenome?"
-
-objectives:
-- "Construct a pangenome following the Anvi'o workflow"
-- "Visualize and interact with the pangenome graph"
-- "Compute and visualize the ANI values of the genomes from the pangenome"
-- "Perform a functional enrichment analysis on a group of genomes from the pangenome"
-
-keypoints:
-- "Anvi’o can build a pangenome starting from genomes or metagenomes, or a combination of both"
-- "Anvi'o allows you to interactively visualize your pangenomes"
-- "Anvi'o platform includes additional scripts to explore the geometric and biochemical homogeneity of the gene clusters, to compute and visualize the ANI values of the genomes, to conduct a functional enrichment analysis in a group of genomes, among others"
 ---
+
+::::::::::::::::::::::::::::::::::::::: objectives
+
+- Construct a pangenome following the Anvi'o workflow
+- Visualize and interact with the pangenome graph
+- Compute and visualize the ANI values of the genomes from the pangenome
+- Perform a functional enrichment analysis on a group of genomes from the pangenome
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+:::::::::::::::::::::::::::::::::::::::: questions
+
+- How can I obtain an interactive pangenome plot?
+- How can I measure the homogeneity of the gene families?
+- How to obtain an enrichment analysis of the gene families?
+- How to compute the ANI values between the genomes of the pangenome?
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
 
 ## Anvi'o
 
-Anvi’o is an open-source, community-driven analysis and visualization platform for microbial omics.
+Anvi'o is an open-source, community-driven analysis and visualization platform for microbial omics.
 It brings together many aspects of today's cutting-edge strategies, including **genomics, metagenomics, metatranscriptomics, phylogenomics, microbial population genetics, pangenomics, and metapangenomics** in an *integrated* and *easy-to-use* fashion through extensive interactive visualization capabilities.
 
-In this episode, we will meet another pangenomics powerful tool. The pangenomics workflow of Anvi'o is not suitable for thousands 
-of genomes like the PPanGGOLiN workflow, but it allows for an interactive exploration of smaller pangenomes, providing you with a 
+In this episode, we will meet another pangenomics powerful tool. The pangenomics workflow of Anvi'o is not suitable for thousands
+of genomes like the PPanGGOLiN workflow, but it allows for an interactive exploration of smaller pangenomes, providing you with a
 closer look at the pangenome matrix and some interesting characteristics of our gene families.
 
 ## Preparing the databases for each genome
 
 To start using Anvi'o, activate the conda environment `Pangenomics_Global`.
-~~~
+
+```bash
 $ conda activate /miniconda3/envs/anvio-7.1
-~~~
-{: .language-bash}
+```
 
 Move into the directory named `results` and create a new directory called `anvi-o` for the Anvi'o analysis.
-~~~
+
+```bash
 $ cd ~/pan_workshop/results/pangenome
 $ mkdir anvi-o
 $ cd anvi-o
-~~~
-{: .language-bash}
+```
 
 In order to better organize our Anvi'o results, create a new directory named `genome-db` that will be used to store the genome database needed for the Anvi'o pangenome workflow. We will use the `.gbk` files that came out of Prokka as input for the Anvi'o workflow. They can be found in `~/pan_workshop/results/annotated`.
-~~~
+
+```bash
 $ mkdir genome-db
-~~~
-{: .language-bash}
+```
 
 To build a pangenome Anvi'o needs to extract the sequences AND OTHER INFORMATION from the `gbk` files. To do this
 let's do a while loop to get the file names of each `gbk` and run the `anvi-script-process-genbank` script for each of them.
-~~~
+
+```bash
 $ ls ~/pan_workshop/results/annotated/Streptococcus_agalactiae_* | cut -d'/' -f7 | cut -d '.' -f1 | while read line
 do
 anvi-script-process-genbank -i GENBANK --input-genbank ~/pan_workshop/results/annotated/$line.gbk -O genome-db/$line
 done
-~~~
-{: .language-bash}
+```
 
-~~~
+```bash
 $ cd genome-db
 $ ls
-~~~
-{: .language-bash}
+```
 
-~~~
+```output
 Streptococcus_agalactiae_18RS21_prokka-contigs.fa 
 Streptococcus_agalactiae_18RS21_prokka-external-functions.txt 
 Streptococcus_agalactiae_18RS21_prokka-external-gene-calls.txt 
 ...
-~~~
-{: .output}
+```
 
 Now we have our `genome-db/` with the files that Anvi'o needs. Now we need to reformat the generated `fasta` files so that the GENE NAMES ARE STANDARDIZED. Let's do it
 with the `anvi-script-reformat-fasta` script.
 
-~~~
+```bash
 $ ls *fa |while read line
 do
 anvi-script-reformat-fasta --seq-type NT $line -o $line\.fasta
 done
 $ ls
-~~~
-{: .language-bash}
+```
 
-~~~
+```output
 Streptococcus_agalactiae_18RS21_prokka-contigs.fa 
 Streptococcus_agalactiae_18RS21_prokka-contigs.fa.fasta 
 Streptococcus_agalactiae_18RS21_prokka-external-functions.txt 
 Streptococcus_agalactiae_18RS21_prokka-external-gene-calls.txt 
 ...
-~~~
-{: .output}
+```
 
 With these new files now we need to GATHER THAT INFORMATION in an Anvi'o database format. To create a database per genome we need to run the `anvi-gen-contigs-database` script.
 
-~~~
+```bash
 $ ls *fasta | while read line; do anvi-gen-contigs-database -T 4 -f $line -o $line-contigs.db; done
 $ ls
-~~~
-{: .language-bash}
+```
 
-~~~
+```output
 Streptococcus_agalactiae_18RS21_prokka-contigs.fa 
 Streptococcus_agalactiae_18RS21_prokka-contigs.fa.fasta 
 Streptococcus_agalactiae_18RS21_prokka-contigs.fa.fasta-contigs.db 
 Streptococcus_agalactiae_18RS21_prokka-external-functions.txt 
 Streptococcus_agalactiae_18RS21_prokka-external-gene-calls.txt 
 ...
-~~~
-{: .output}
+```
 
 The database files have a super long name, so we should replace the extension to only `.db`.
 
-~~~
+```bash
 $ rename s'/.fa.fasta-contigs.db/.db/' *db
 $ ls *.db
-~~~
-{: .language-bash}
+```
 
-~~~
+```output
 Streptococcus_agalactiae_18RS21_prokka-contigs.db 
 ...
-~~~
-{: .output}
+```
 
 When using external genomes (genomes that are not part of the Anvi'o collection), a list of the genome IDs and their corresponding genome database is required. This list tells Anvi'o which genomes will be processed to construct the pangenome.
-~~~
+
+```bash
 $ ls *.fa | cut -d '-' -f1 | while read line
 do
 echo $line$'\t'$line-contigs.db >> external-genomes.txt
 done
 $ head external-genomes.txt
-~~~
-{: .language-bash}
+```
 
-~~~
+```output
 Streptococcus_agalactiae_18RS21_prokka  Streptococcus_agalactiae_18RS21_prokka-contigs.db
 Streptococcus_agalactiae_2603V_prokka   Streptococcus_agalactiae_2603V_prokka-contigs.db
 Streptococcus_agalactiae_515_prokka     Streptococcus_agalactiae_515_prokka-contigs.db
@@ -147,16 +141,15 @@ Streptococcus_agalactiae_CJB111_prokka  Streptococcus_agalactiae_CJB111_prokka-c
 Streptococcus_agalactiae_COH1_prokka    Streptococcus_agalactiae_COH1_prokka-contigs.db
 Streptococcus_agalactiae_H36B_prokka    Streptococcus_agalactiae_H36B_prokka-contigs.db
 Streptococcus_agalactiae_NEM316_prokka  Streptococcus_agalactiae_NEM316_prokka-contigs.db
-~~~
-{: .output}
+```
 
 Let's add a header to the list that we made.
-~~~
-$ nano external-genomes.txt
-~~~
-{: .language-bash}
 
-~~~
+```bash
+$ nano external-genomes.txt
+```
+
+```output
 name    contigs_db_path
 Streptococcus_agalactiae_18RS21_prokka  Streptococcus_agalactiae_18RS21_prokka-contigs.db
 Streptococcus_agalactiae_2603V_prokka   Streptococcus_agalactiae_2603V_prokka-contigs.db
@@ -166,23 +159,22 @@ Streptococcus_agalactiae_CJB111_prokka  Streptococcus_agalactiae_CJB111_prokka-c
 Streptococcus_agalactiae_COH1_prokka    Streptococcus_agalactiae_COH1_prokka-contigs.db
 Streptococcus_agalactiae_H36B_prokka    Streptococcus_agalactiae_H36B_prokka-contigs.db
 Streptococcus_agalactiae_NEM316_prokka  Streptococcus_agalactiae_NEM316_prokka-contigs.db
-~~~
-{: .output}
+```
 
 ## Building the pangenome
 
 ### HMM
+
 Now we are ready to identify matching genes in each contigs database file, for this, we will execute the HMM analysis with the `anvi-run-hmms` script.
 
-~~~
+```bash
 $ ls *contigs.db | while read line
 do
 anvi-run-hmms -c $line
 done
-~~~
-{: .language-bash}
+```
 
-~~~
+```output
 Contigs DB ...................................: Streptococcus_agalactiae_18RS21_prokka-contigs.db
 HMM sources ..................................: Ribosomal_RNA_5S, Ribosomal_RNA_12S, Bacteria_71, Ribosomal_RNA_16S, Archaea_76,
                                                 Ribosomal_RNA_28S, Ribosomal_RNA_18S, Protista_83, Ribosomal_RNA_23S
@@ -203,7 +195,7 @@ Number of CPUs will be used for search .......: 1
 HMMer program used for search ................: nhmmscan
 Temporary work dir ...........................: /tmp/tmplk81rft0
 Log file for thread 0 ........................: /tmp/tmplk81rft0/RNA_contig_sequences.fa.0_log
-Done 🎊
+Done 
 
 Number of raw hits in table file .............: 0
 
@@ -223,37 +215,39 @@ Number of CPUs will be used for search .......: 1
 HMMer program used for search ................: nhmmscan
 Temporary work dir ...........................: /tmp/tmplk81rft0
 Log file for thread 0 ........................: /tmp/tmplk81rft0/RNA_contig_sequences.fa.0_log
-Done 🎊
+Done 
 
 Number of raw hits in table file .............: 0
 
 * The HMM source 'Ribosomal_RNA_12S' returned 0 hits. SAD (but it's stil OK).
 
-~~~
-{: .output}
+```
 
-> ## Know more
-> If you want to read more about HMM .
-{: .callout}
+:::::::::::::::::::::::::::::::::::::::::  callout
+
+## Know more
+
+If you want to read more about HMM .
+
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
 
 ### Creating a combined database
 
-Create the genome database `genomes-storage-db` using the `anvi-gen-genomes-storage` script. In this case, we named this `genomes-storage-db` as **STREPTOCOCCUS_AGALACTIAE_GENOMES.db**, which will be used downstream as input in other processes.
+Create the genome database `genomes-storage-db` using the `anvi-gen-genomes-storage` script. In this case, we named this `genomes-storage-db` as **STREPTOCOCCUS\_AGALACTIAE\_GENOMES.db**, which will be used downstream as input in other processes.
 
-~~~
+```bash
 $ anvi-gen-genomes-storage -e external-genomes.txt -o STREPTOCOCCUS_AGALACTIAE_GENOMES.db
 $ ls *.db
-~~~
-{: .language-bash}
+```
 
-~~~
+```output
 Streptococcus_agalactiae_18RS21_prokka-contigs.db  Streptococcus_agalactiae_COH1_prokka-contigs.db
 Streptococcus_agalactiae_2603V_prokka-contigs.db   STREPTOCOCCUS_AGALACTIAE_GENOMES.db
 Streptococcus_agalactiae_515_prokka-contigs.db     Streptococcus_agalactiae_H36B_prokka-contigs.db
 Streptococcus_agalactiae_A909_prokka-contigs.db    Streptococcus_agalactiae_NEM316_prokka-contigs.db
 Streptococcus_agalactiae_CJB111_prokka-contigs.db
-~~~
-{: .output}
+```
 
 ### Making a pangenomic database
 
@@ -263,7 +257,7 @@ The desciption of this script is the next using the flag '-g' indicated that to 
 
 ABEL EXPLICA LAS FLAGS DE ESTO
 
-~~~
+```bash
 $ anvi-pan-genome -g STREPTOCOCCUS_AGALACTIAE_GENOMES.db \
             	--project-name "PANGENOME-AGALACTIAE" \
             	--output-dir AGALACTIAE \
@@ -271,19 +265,21 @@ $ anvi-pan-genome -g STREPTOCOCCUS_AGALACTIAE_GENOMES.db \
             	--minbit 0.5 \
             	--mcl-inflation 10 \
             	--use-ncbi-blast
-~~~
-{: .language-bash}
+```
 
-> ## Know more
-> If you want to read more about th flags "minbit" and "MCL".
-> Too-weak matches were culled by employing the --minbit criterion with the default value of 0.5, to minimize feeding MCL irrelevant similarities - by calculating all 
+:::::::::::::::::::::::::::::::::::::::::  callout
+
+## Know more
+
+If you want to read more about th flags "minbit" and "MCL".
+Too-weak matches were culled by employing the --minbit criterion with the default value of 0.5, to minimize feeding MCL irrelevant similarities - by calculating all
 possible pairwise similarities, we introduce nonsensical comparisons, e.g., DnaK to TonB, that can be disregarded by their poor alignment quality prior to MCL. CITAR A DUTTER
-MCL uses a hyperparameter, “inflation,” to adjust the clustering sensitivity, i.e., the tendency to split clusters. MCL then uses these pairwise identities to group ORFs into gene clusters, putatively homologous gene groups. MCL uses a hyperparameter (inflation, --mcl-inflation) to adjust the clustering sensitivity, i.e., the tendency to split clusters. The decision for this flag depend of the level of you genomes, for example if you want to construct a pangenome to level Genus you can use a MCL more low and if you want to construct a pangenome level you can use more high.
-{: .callout}
+MCL uses a hyperparameter, "inflation," to adjust the clustering sensitivity, i.e., the tendency to split clusters. MCL then uses these pairwise identities to group ORFs into gene clusters, putatively homologous gene groups. MCL uses a hyperparameter (inflation, --mcl-inflation) to adjust the clustering sensitivity, i.e., the tendency to split clusters. The decision for this flag depend of the level of you genomes, for example if you want to construct a pangenome to level Genus you can use a MCL more low and if you want to construct a pangenome level you can use more high.
 
 
+::::::::::::::::::::::::::::::::::::::::::::::::::
 
-~~~
+```output
 WARNING
 ===============================================
 If you publish results from this workflow, please do not forget to cite DIAMOND
@@ -340,24 +336,21 @@ The workflow you are using will likely use 'muscle' by Edgar,
 doi:10.1093/nar/gkh340 (http://www.drive5.com/muscle) to align your sequences.
 If you publish your findings, please do not forget to properly credit this tool.
 
-* Your pangenome is ready with a total of 2,842 gene clusters across 8 genomes 🎉
+* Your pangenome is ready with a total of 2,842 gene clusters across 8 genomes 
 
-~~~
-{: .output}
-
+```
 
 ## Creating an interactive plot
 
 Create the interactive pangenome with the `anvi-display-pan` script using as input the `genomes-storage-db`  `STREPTOCOCCUS_AGALACTIAE_GENOMES.db` and the `pan-db`  `PANGENOME-AGALACTIAE-PAN.db` (located in `AGALACTIAE` directory)
 
-~~~
+```bash
 $ anvi-display-pan -g STREPTOCOCCUS_AGALACTIAE_GENOMES.db \
 	-p AGALACTIAE/PANGENOME-AGALACTIAE-PAN.db
-~~~
-{: .language-bash}
+```
 
-~~~
-* The server is up and running 🎉
+```output
+* The server is up and running 
 
 WARNING
 ===============================================
@@ -375,46 +368,58 @@ Server address ...............................: http://0.0.0.0:8080
 command line.
 
 
-~~~
-{: .output}
-
+```
 
 Without disturbing the active terminal, open a new window in your preferred browser (recommended Chrome), copy-paste the following link `http://bioinformatica.matmor.unam.mx:8080` and click on the bottom `Draw` to see your results and start interacting with your pangenome
 
-<a href="../fig/01-03-02.svg">
-  <img src="../fig/01-03-02.svg" width="956.5" height="453.5" alt="Interactive Anvio pan genome analysis of six S. agalactiae genomes.
+<a href="fig/01-03-02.svg">
+  <img src="fig/01-03-02.svg" width="956.5" height="453.5" alt="Interactive Anvio pan genome analysis of six S. agalactiae genomes.
                                                                	Each circle corresponds to one genome and each radius represents a gene family. " />
 </a>
 
-{: .output}
-> ## Exercise 1(Begginer): Explore the interactive plot.
-> Now we have a pangenome and we are going to give it an overview. Remember that Anvio allows us to have a very attractive view of different analyses in the same figure.
-> The best thing is that we can edit it as we like!.
-> 
-> In general, the innermost rings represent the genomes we used from Agalactiae to create the pangenome. We can observe that these rings are made up of the black color, which represents the number of gene clusters that are shared (gene core) in the Agalatiae genomes, while the grayish part represents the gene clusters that are absent in each genome.
-> 
-> Using the interactive pangenome, perform the following actions.
-> 
-> a) Order gene clusters by presence-absence.
-> 
-> b) Which genome has the most gene clusters?.
-> 
->>## Solution
->>
->>
->> a) To order the gene clusters by frequency, go to "samples" and then search for "order view" and select "gene_cluster presence absence".
->>
->> b) To solve this question, just look at the bar graphs on the right and find the one called "Num. gene clusters".
->>
->>
->{: .solution}
-{: .challenge}
+:::::::::::::::::::::::::::::::::::::::  challenge
+
+## Exercise 1(Begginer): Explore the interactive plot.
+
+Now we have a pangenome and we are going to give it an overview. Remember that Anvio allows us to have a very attractive view of different analyses in the same figure.
+The best thing is that we can edit it as we like!.
+
+In general, the innermost rings represent the genomes we used from Agalactiae to create the pangenome. We can observe that these rings are made up of the black color, which represents the number of gene clusters that are shared (gene core) in the Agalatiae genomes, while the grayish part represents the gene clusters that are absent in each genome.
+
+Using the interactive pangenome, perform the following actions.
+
+a) Order gene clusters by presence-absence.
+
+b) Which genome has the most gene clusters?.
+
+:::::::::::::::  solution
+
+## Solution
+
+a) To order the gene clusters by frequency, go to "samples" and then search for "order view" and select "gene\_cluster presence absence".
+
+b) To solve this question, just look at the bar graphs on the right and find the one called "Num. gene clusters".
+
+:::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
 
 ## Special analyses
+
 Anvi'o allows us to identify different levels of disagreement between amino acid sequences in different genomes. Amino acid sequences from different genomes in a gene cluster that are almost identical tell us that the gene cluster is highly homogeneous. The **geometric homogeneity index** tells us the degree of geometric configuration between the genes of a gene cluster and the **functional homogeneity index** considers aligned residues and quantifies differences across residues in a site. For more info see [this.](https://merenlab.org/2016/11/08/pangenomics-v2/#inferring-the-homogeneity-of-gene-clusters)
 
 Anvi'o can also estimate evolutionary relationships between genomes with the `concatenated-gene-alignment-fasta` to produce the phylogenomic tree. For more information see [this](https://anvio.org/help/main/programs/anvi-gen-phylogenomic-tree/)
 
- With Anvi'o you can further analyze your pangenome with [`anvi-split`](https://anvio.org/help/main/programs/anvi-split/) to create independent pangenomes that contain only singletons or contain only core gene clusters.
+With Anvi'o you can further analyze your pangenome with [`anvi-split`](https://anvio.org/help/main/programs/anvi-split/) to create independent pangenomes that contain only singletons or contain only core gene clusters.
 
-{% include links.md %}
+
+
+:::::::::::::::::::::::::::::::::::::::: keypoints
+
+- Anvi’o can build a pangenome starting from genomes or metagenomes, or a combination of both
+- Anvi'o allows you to interactively visualize your pangenomes
+- Anvi'o platform includes additional scripts to explore the geometric and biochemical homogeneity of the gene clusters, to compute and visualize the ANI values of the genomes, to conduct a functional enrichment analysis in a group of genomes, among others
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+

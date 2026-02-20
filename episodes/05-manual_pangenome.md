@@ -1,57 +1,63 @@
 ---
-title: "Clustering with BLAST Results"  
+title: Clustering with BLAST Results
 teaching: 30
 exercises: 5
-questions:
-- "How can we use the blast results to form families?"
-objectives:
-- "Use a clustering algorithm to form families using the E-value."
-keypoints:
-- "The Bidirectional Best-Hit algorithm groups sequences together into families according to the E-value."
 ---
+
+::::::::::::::::::::::::::::::::::::::: objectives
+
+- Use a clustering algorithm to form families using the E-value.
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+:::::::::::::::::::::::::::::::::::::::: questions
+
+- How can we use the blast results to form families?
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
 
 ## Using E-values to cluster sequences into families
 
-In the previous episode, we obtained the E-value between each pair of sequences of our mini dataset. Even though it is not strictly an identity measure between the sequences, 
-the E-value allows us to know from a pool of sequences which one is the best match to a query sequence. We will now use this information to cluster the sequences from 
-families using an algorithm written in Python, and we will see how it 
+In the previous episode, we obtained the E-value between each pair of sequences of our mini dataset. Even though it is not strictly an identity measure between the sequences,
+the E-value allows us to know from a pool of sequences which one is the best match to a query sequence. We will now use this information to cluster the sequences from
+families using an algorithm written in Python, and we will see how it
 joins the sequences progressively until each of them is part of a family.
 
 ## Processing the BLAST results
 
 For this section, we will use Python. Let's open the notebook and start by importing the libraries that we will need.
-~~~
+
+```python
 import os 
 import pandas as pd
 from matplotlib import cm
 import numpy as np
-~~~
-{: .language-python}
+```
+
 First, we need to read the `mini-genomes.blast` file that we produced.
 Let's import the BLAST results to Python using the column names: `qseqid`,`sseqid`, `evalue`.
 
-~~~
+```python
 os.getcwd()
 blastE = pd.read_csv( '~/pan_workshop/results/blast/mini/output_blast/mini-genomes.blast', sep = '\t',names = ['qseqid','sseqid','evalue'])
 blastE.head()
-~~~
-{: .language-python}
+```
 
-~~~
+```output
   qseqid	               sseqid	               evalue
 0	2603V|GBPINHCM_01420	NEM316|AOGPFIKH_01528	4.110000e-67
 1	2603V|GBPINHCM_01420	A909|MGIDGNCP_01408	4.110000e-67
 2	2603V|GBPINHCM_01420	515|LHMFJANI_01310	4.110000e-67
 3	2603V|GBPINHCM_01420	2603V|GBPINHCM_01420	4.110000e-67
 4	2603V|GBPINHCM_01420	A909|MGIDGNCP_01082	1.600000e+00
-~~~
-{: .output}
+```
 
-Now we want to make two columns that have the name of the genomes of the queries, and the name of the genomes of the subjects. We will take this information from the query 
+Now we want to make two columns that have the name of the genomes of the queries, and the name of the genomes of the subjects. We will take this information from the query
 and subject IDs (the label that we added at the beginning of the episode).
 
 First, let's obtain the genome of each query gene.
-~~~
+
+```python
 qseqid = pd.DataFrame(blastE,columns=['qseqid'])
 
 newqseqid = qseqid["qseqid"].str.split("|", n = 1, expand = True)
@@ -60,80 +66,75 @@ newqseqid["qseqid"]= qseqid
 dfqseqid =newqseqid[['Genome1','qseqid']]
 
 dfqseqid.head()
-~~~
-{: .language-python}
+```
 
-~~~
+```output
   Genome1	qseqid
 0	2603V	2603V|GBPINHCM_01420
 1	2603V	2603V|GBPINHCM_01420
 2	2603V	2603V|GBPINHCM_01420
 3	2603V	2603V|GBPINHCM_01420
 4	2603V	2603V|GBPINHCM_01420
-~~~
-{: .output}
+```
 
 Now let's repeat the same for the `sseqid` column.
-~~~
+
+```python
 sseqid = pd.DataFrame(blastE,columns=['sseqid'])
 
 newsseqid = sseqid["sseqid"].str.split("|", n = 1, expand = True)
 newsseqid.columns= ["Genome2", "Gen"]
 newsseqid["sseqid"]= sseqid 
 dfsseqid = newsseqid[['Genome2','sseqid']]
-~~~
-{: .language-python}
+```
 
 Now that we have two dataframes with the new columns that we wanted, let's combine them with the `evalue` of the `blastE` dataframe into a new one called `df`.
 
-~~~
+```python
 evalue = pd.DataFrame(blastE, columns=['evalue'])
 df = dfqseqid
 df['Genome2']=dfsseqid['Genome2']
 df['sseqid']=sseqid
 df['evalue']=evalue
 df.head()
-~~~
-{: .language-python}
+```
 
-~~~
+```output
   Genome1	qseqid	Genome2	sseqid	evalue
 0	2603V	2603V|GBPINHCM_01420	NEM316	NEM316|AOGPFIKH_01528	4.110000e-67
 1	2603V	2603V|GBPINHCM_01420	A909	A909|MGIDGNCP_01408	4.110000e-67
 2	2603V	2603V|GBPINHCM_01420	515	515|LHMFJANI_01310	4.110000e-67
 3	2603V	2603V|GBPINHCM_01420	2603V	2603V|GBPINHCM_01420	4.110000e-67
 4	2603V	2603V|GBPINHCM_01420	A909	A909|MGIDGNCP_01082	1.600000e+00
-~~~
-{: .output}
+```
 
 Now we want a list of the unique genes in our dataset.
-~~~
+
+```python
 qseqid_unique=pd.unique(df['qseqid'])
 sseqid_unique=pd.unique(df['sseqid'])
 genes = pd.unique(np.append(qseqid_unique, sseqid_unique))
-~~~
-{: .language-python}
+```
 
 We can check that we have 43 genes in total with `len(genes)`.
 
-Now, we want to know which one is the biggest genome (the one with more genes) to make the comparisons.  
+Now, we want to know which one is the biggest genome (the one with more genes) to make the comparisons.
 
 First, we compute the unique genomes.
 
-~~~
+```python
 genomes=pd.unique(df['Genome1'])
 genomes=list(genomes)
 genomes
-~~~
-{: .language-python}
-~~~
+```
+
+```output
 ['2603V', '515', 'A909', 'NEM316']
-~~~
-{: .output}
+```
 
 Now, we will create a dictionary that shows which genes are in each genome.
 
-~~~
+```python
 dic_gen_genomes={}
 for a in genomes:
     temp=[]
@@ -142,11 +143,11 @@ for a in genomes:
             gen=genes[i]
             temp.append(gen)
     dic_gen_genomes[a]=temp
-~~~
-{: .language-python}
+```
 
 We can now use this dictionary to know how many genes each genome has and therefore identify the biggest genome.
-~~~
+
+```python
 genome_temp=[]
 size_genome=[]
 for i in dic_gen_genomes.keys():
@@ -159,57 +160,61 @@ genomes_sizes['Size']=size_genome
 
 genome_sizes_df = genomes_sizes.sort_values('Size', ascending=False)
 genome_sizes_df
-~~~
-{: .language-python}
+```
 
-~~~
+```output
 Genome	Size
 2	A909	12
 0	2603V	11
 1	515	10
 3	NEM316	10
-~~~
-{: .output}
+```
 
 Now we can sort our genomes by their size.
-~~~
+
+```python
 genomes=genome_sizes_df['Genome'].tolist()
 genomes
-~~~
-{: .language-python}
+```
 
-~~~
+```output
 ['A909', '2603V', '515', 'NEM316']
-~~~
-{: .output}
+```
 
 So the biggest genome is `A909` and we will start our clustering algorithm with it.
 
 ## Finding gene families with the BBH algorithm
 
-To make a gene family, we first need to identify the most similar genes between genomes. 
-The Bidirectional best-hit algorithm will allow us to find the pairs of genes that are the most similar 
-(lowest e-value) to each other in each pair of genomes.  
+To make a gene family, we first need to identify the most similar genes between genomes.
+The Bidirectional best-hit algorithm will allow us to find the pairs of genes that are the most similar
+(lowest e-value) to each other in each pair of genomes.
 
-<a href="{{ page.root }}/fig/bdbh.png">
-   <img src="{{ page.root }}/fig/bdbh.png" alt=" Bidirectional best-hit algorithm" />
+<a href="fig/bdbh.png">   <img src="fig/bdbh.png" alt=" Bidirectional best-hit algorithm" />
   </a>
 
 For this, we will define a function to find in each genome the gene that is most similar to each
-gene in our biggest genome A909. 
+gene in our biggest genome A909.
 
-> ## Clustering algorithms
-> Can the BBH algorithm make gene families that have more than one gene from the same genome?
-> > ## Solution
-> > No. Since BBH finds the best hit of a query in each of the other genomes it will only give one hit per genome. This will force to
-> > have a different gene family for each duplicate of a gene (paralog).
-> > This also means that you are getting the **best** hit, which is not necessarily a **"good"** hit. To define what a good hit is we would
-> > need to use an algorithm that considers a similarity threshold.
-> > 
-> {: .solution}
-{: .discussion}
+::::::::::::::::::::::::::::::::::::::  discussion
 
-~~~
+## Clustering algorithms
+
+Can the BBH algorithm make gene families that have more than one gene from the same genome?
+
+:::::::::::::::  solution
+
+## Solution
+
+No. Since BBH finds the best hit of a query in each of the other genomes it will only give one hit per genome. This will force to
+have a different gene family for each duplicate of a gene (paralog).
+This also means that you are getting the **best** hit, which is not necessarily a **"good"** hit. To define what a good hit is we would
+need to use an algorithm that considers a similarity threshold.
+
+:::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+```python
 def besthit(gen,genome,data):
     # gen: a fixed gen in the list of unique genes
     # genome: the genome in which we will look the best hit
@@ -221,13 +226,12 @@ def besthit(gen,genome,data):
         gen_besthit = data.loc[filter_cd,'sseqid'].at[data.loc[filter_cd,'evalue'].idxmin()]
    
     return(gen_besthit)
-~~~
-{: .language-python}
+```
 
 Now we will define a second function, that uses the previous one, to obtain the bidirectional
-best hits.  
+best hits.
 
-~~~
+```python
 def besthit_bbh(gengenome,listgenomes,genome,data):
     # gengenome: a list with all the genes of the biggest genome.
     # listgenomes: the list with all the genomes in order.
@@ -247,36 +251,32 @@ def besthit_bbh(gengenome,listgenomes,genome,data):
         dic_besthits[a]=temp
         
     return(dic_besthits)
-~~~
-{: .language-python}
+```
 
 In one of the previous steps, we created a dictionary with all the genes present in each genome.
-Since we know that the biggest genome is `A909`, we will obtain the genes belonging to `A909` and 
-gather them in a list.  
+Since we know that the biggest genome is `A909`, we will obtain the genes belonging to `A909` and
+gather them in a list.
 
-~~~
+```python
 genome_A909 = dic_gen_genomes['A909']
-~~~
-{: .language-python}
+```
 
 Now, we will apply the function `besthit_bbh` to the previous list, `genomes`, and  the genome `A909` that is `genomes[0]`.
 
-~~~
+```python
 g_A909_bbh=besthit_bbh(genome_A909,genomes,genomes[0],df)
-~~~
-{: .language-python}
+```
 
 In `g_A909_bbh` we have a dictionary that has one gene family for each gene in A909. Let's convert it to a dataframe and have a better look at it.
 
-~~~
+```python
 family_A909=pd.DataFrame(g_A909_bbh).transpose()
 family_A909.columns = ['g_A909','g_2603V','g_515','g_NEM316']
 family_A909.g_A909 = family_A909.index
 family_A909
-~~~
-{: .language-python}
+```
 
-~~~
+```output
 	                g_A909	                g_2603V	                g_515	                g_NEM316
 A909|MGIDGNCP_01408	A909|MGIDGNCP_01408	2603V|GBPINHCM_01420	515|LHMFJANI_01310	NEM316|AOGPFIKH_01528
 A909|MGIDGNCP_00096	A909|MGIDGNCP_00096	2603V|GBPINHCM_00097	515|LHMFJANI_00097	NEM316|AOGPFIKH_00098
@@ -290,23 +290,21 @@ A909|MGIDGNCP_00627	A909|MGIDGNCP_00627	NA	                NA	                NA
 A909|MGIDGNCP_01082	A909|MGIDGNCP_01082	2603V|GBPINHCM_01042	NA	                NA
 A909|MGIDGNCP_00877	A909|MGIDGNCP_00877	2603V|GBPINHCM_00815	515|LHMFJANI_00781	NEM316|AOGPFIKH_00855
 A909|MGIDGNCP_00405	A909|MGIDGNCP_00405	2603V|GBPINHCM_00401	515|LHMFJANI_00394	NEM316|AOGPFIKH_00403
-~~~
-{: .output}
+```
 
 Here, we have all the families that contain one gene from the biggest genome. The following step is to repeat
-this for the second-biggest genome. To do this, we need to remove from the list `genes` the genes that are already 
+this for the second-biggest genome. To do this, we need to remove from the list `genes` the genes that are already
 placed in the current families.
 
-~~~
+```python
 list_g=[]
 for elemt in g_A909_bbh.keys():
     list_g.append(elemt)
     for g_hit in g_A909_bbh[elemt]:
         list_g.append(g_hit)
-~~~
-{: .language-python}
+```
 
-~~~
+```python
 genes2=genes
 genes2=genes2.tolist()
 genesremove=pd.unique(list_g).tolist()
@@ -315,17 +313,15 @@ for b_hits in genesremove:
     genes2.remove(b_hits)
 
 genes2
-~~~
-{: .language-python}
+```
 
-~~~
+```output
 ['2603V|GBPINHCM_00748', '2603V|GBPINHCM_01226', '515|LHMFJANI_01625', 'NEM316|AOGPFIKH_01842']
-~~~
-{: .output}
+```
 
 For this 4 genes we will repeat the algorithm. First, we create the list with the genes that belongs to the second biggest genome `2603V`.
 
-~~~
+```python
 genome_2603V=[]
 for i in range(len(genes2)):
     if "2603V" in genes2[i]:
@@ -333,53 +329,47 @@ for i in range(len(genes2)):
         genome_2603V.append(gen)
         
 genome_2603V
-~~~
-{: .language-python}
-~~~
+```
+
+```output
 ['2603V|GBPINHCM_00748', '2603V|GBPINHCM_01226']
-~~~
-{: .output}
+```
 
 We apply the function `besthit_bbh` to this list.
 
-~~~
+```python
 g_2603V_bbh=besthit_bbh(genome_2603V,genomes,genomes[1],df)
-~~~
-{: .language-python}
+```
 
 We convert the dictionary into a dataframe.
 
-~~~
+```python
 family_2603V=pd.DataFrame(g_2603V_bbh).transpose()
 family_2603V.columns = ['g_A909','g_2603V','g_515','g_NEM316']
 family_2603V.g_2603V = family_2603V.index
 family_2603V.head()
-~~~
-{: .language-python}
+```
 
-~~~
+```output
                         g_A909	g_2603V	               g_515	  g_NEM316
 2603V|GBPINHCM_00748	NA	2603V|GBPINHCM_00748	NA	   NA
 2603V|GBPINHCM_01226	NA	2603V|GBPINHCM_01226	NA	   NA
-~~~
-{: .output}
+```
 
 Again, let's eliminate the genes that are already placed in families to repeat the algorithm.
 
-~~~
+```python
 for a in genome_2603V:
     genes2.remove(a)
 
 genes2
-~~~
-{: .language-python}
+```
 
-~~~
+```output
 ['515|LHMFJANI_01625', 'NEM316|AOGPFIKH_01842']
-~~~
-{: .output}
+```
 
-~~~
+```python
 genome_515=[]
 for i in range(len(genes2)):
     if "515" in genes2[i]:
@@ -387,43 +377,39 @@ for i in range(len(genes2)):
         genome_515.append(gen)
         
 genome_515
-~~~
-{: .language-python}
-~~~
-['515|LHMFJANI_01625']
-~~~
-{: .output}
-~~~
-g_515_bbh=besthit_bbh(genome_515,genomes,genomes[2],df)
-~~~
-{: .language-python}
+```
 
-~~~
+```output
+['515|LHMFJANI_01625']
+```
+
+```python
+g_515_bbh=besthit_bbh(genome_515,genomes,genomes[2],df)
+```
+
+```python
 family_515=pd.DataFrame(g_515_bbh).transpose()
 family_515.columns = ['g_A909','g_2603V','g_515','g_NEM316']
 family_515.g_515 = family_515.index
 family_515
-~~~
-{: .language-python}
+```
 
-~~~
+```output
                     g_A909  g_2603V g_515               g_NEM316
 515|LHMFJANI_01625  NA      NA      515|LHMFJANI_01625  NEM316|AOGPFIKH_01842
-~~~
-{: .output}
+```
 
-Since in this last step we used all the genes, we have finished our algorithm.  
+Since in this last step we used all the genes, we have finished our algorithm.
 
 Now we will only create a final dataframe to integrate all of the obtained families.
 
-~~~
+```python
 families_bbh=pd.concat([family_A909,family_2603V,family_515])
 families_bbh.to_csv('families_bbh.csv')
 families_bbh
-~~~
-{: .language-python}
+```
 
-~~~
+```output
 	                 g_A909	           g_2603V	             g_515	             g_NEM316
 A909|MGIDGNCP_01408	A909|MGIDGNCP_01408	2603V|GBPINHCM_01420	515|LHMFJANI_01310	NEM316|AOGPFIKH_01528
 A909|MGIDGNCP_00096	A909|MGIDGNCP_00096	2603V|GBPINHCM_00097	515|LHMFJANI_00097	NEM316|AOGPFIKH_00098
@@ -440,17 +426,16 @@ A909|MGIDGNCP_00405	A909|MGIDGNCP_00405	2603V|GBPINHCM_00401	515|LHMFJANI_00394	
 2603V|GBPINHCM_00748	NA	             2603V|GBPINHCM_00748	  NA	                NA
 2603V|GBPINHCM_01226	NA	             2603V|GBPINHCM_01226	  NA	                NA
 515|LHMFJANI_01625	NA	                NA	                 515|LHMFJANI_01625	  NEM316|AOGPFIKH_01842
-~~~
-{: .output}
-Here we have our complete pangenome! In the first column, we have the gene family names, and then one column per genome 
-with the genes that belong to each family.  
+```
+
+Here we have our complete pangenome! In the first column, we have the gene family names, and then one column per genome
+with the genes that belong to each family.
 
 Finally, we will export to a `csv` file.
 
-~~~
+```python
 families_bbh.to_csv('~/pan_workshop/results/blast/mini/families_minis.csv')
-~~~
-{: .language-python}
+```
 
 ## Explore functional annotation of gene families
 
@@ -459,12 +444,11 @@ obtained families coincide with the functional annotations. For this, we will go
 
 The unique functional annotation that our mini genomes have are the following.
 
-~~~
+```bash
 $ cat mini-genomes.faa | grep '>' | cut -d' ' -f2- | sort | uniq
-~~~
-{: .language-bash}
+```
 
-~~~
+```output
 30S ribosomal protein S16
 50S ribosomal protein L16
 bifunctional DNA primase/polymerase
@@ -480,13 +464,12 @@ Replication protein RepB
 Ribosome hibernation promotion factor
 UDP-N-acetylglucosamine--N-acetylmuramyl-(pentapeptide) pyrophosphoryl-undecaprenol N-acetylglucosamine transferase
 Vitamin B12 import ATP-binding protein BtuD
-~~~
-{: .output}
+```
 
 Let's use these functional annotation names to obtain the gene names in the `mini-genomes.faa` file and the gene family names
 from the `families_minis.csv` table. With all the information together let's create a new table that describes our pangenome.
 
-~~~
+```bash
 $ echo Function$'\t'Gene$'\t'Family > mini_pangenome.tsv
 $ cat mini-genomes.faa | grep '>' | cut -d' ' -f2- | sort | uniq | while read function
 do 
@@ -497,10 +480,9 @@ echo $function$'\t'$line$'\t'$family
 done
 done >> mini_pangenome.tsv
 $ head mini_pangenome.tsv
-~~~
-{: .language-bash}
+```
 
-~~~
+```output
 Function                  Gene                  Family
 30S ribosomal protein S16 2603V|GBPINHCM_01420  A909|MGIDGNCP_01408
 30S ribosomal protein S16 515|LHMFJANI_01310    A909|MGIDGNCP_01408
@@ -510,33 +492,47 @@ Function                  Gene                  Family
 50S ribosomal protein L16 515|LHMFJANI_00097    A909|MGIDGNCP_00096
 50S ribosomal protein L16 A909|MGIDGNCP_00096   A909|MGIDGNCP_00096
 50S ribosomal protein L16 NEM316|AOGPFIKH_00098 A909|MGIDGNCP_00096
-~~~
-{: .output}
+```
 
-> ## Exercise 1(Begginer): Partitioning the pangenome
-> Since we have a very small pangenome we can know the partitions of our pangenome just by looking at a small table.
-> Look at the `mini_pangenom.tsv` table and decide which families correspond to the **Core**, **Shell** and **Cloud** genomes.
-> 
-> Note: You might want to download the file to your computer and open it in a spreadsheet program to read it easily.
-> > ## Solution
-> > 
-> > |Functional annotation of family | No. Genomes | Partition |
-> > |---|---|---|
-> > |30S ribosomal protein S16|4|Core|
-> > |50S ribosomal protein L16|4|Core|
-> > |Glutamate 5-kinase 1|4|Core|
-> > |glycosyltransferase|4|Core|
-> > |peptidase U32 family protein|4|Core|
-> > |Putative N-acetylmannosamine-6-phosphate 2-epimerase|4|Core|
-> > |Ribosome hibernation promotion factor|4|Core|
-> > |UDP-N-acetylglucosamine--N-acetylmuramyl-(pentapeptide) pyrophosphoryl-undecaprenol N-acetylglucosamine transferase|4|Core|
-> > |Glycine betaine transporter OpuD|2|Shell|
-> > |Periplasmic murein peptide-binding protein|2|Shell|
-> > |Replication protein RepB|2|Shell|
-> > |Vitamin B12 import ATP-binding protein BtuD|2|Shell|
-> > |bifunctional DNA primase/polymerase|1|Cloud|
-> > |Glycosyltransferase GlyG|1|Cloud|
-> > |PII-type proteinase|1|Cloud|
-> > 
-> {: .solution}
-{: .challenge}
+:::::::::::::::::::::::::::::::::::::::  challenge
+
+## Exercise 1(Begginer): Partitioning the pangenome
+
+Since we have a very small pangenome we can know the partitions of our pangenome just by looking at a small table.
+Look at the `mini_pangenom.tsv` table and decide which families correspond to the **Core**, **Shell** and **Cloud** genomes.
+
+Note: You might want to download the file to your computer and open it in a spreadsheet program to read it easily.
+
+:::::::::::::::  solution
+
+## Solution
+
+| Functional annotation of family                                                                                     | No. Genomes | Partition | 
+| ------------------------------------------------------------------------------------------------------------------- | ----------- | --------- |
+| 30S ribosomal protein S16                                                                                           | 4           | Core      | 
+| 50S ribosomal protein L16                                                                                           | 4           | Core      | 
+| Glutamate 5-kinase 1                                                                                                | 4           | Core      | 
+| glycosyltransferase                                                                                                 | 4           | Core      | 
+| peptidase U32 family protein                                                                                        | 4           | Core      | 
+| Putative N-acetylmannosamine-6-phosphate 2-epimerase                                                                | 4           | Core      | 
+| Ribosome hibernation promotion factor                                                                               | 4           | Core      | 
+| UDP-N-acetylglucosamine--N-acetylmuramyl-(pentapeptide) pyrophosphoryl-undecaprenol N-acetylglucosamine transferase | 4           | Core      | 
+| Glycine betaine transporter OpuD                                                                                    | 2           | Shell     | 
+| Periplasmic murein peptide-binding protein                                                                          | 2           | Shell     | 
+| Replication protein RepB                                                                                            | 2           | Shell     | 
+| Vitamin B12 import ATP-binding protein BtuD                                                                         | 2           | Shell     | 
+| bifunctional DNA primase/polymerase                                                                                 | 1           | Cloud     | 
+| Glycosyltransferase GlyG                                                                                            | 1           | Cloud     | 
+| PII-type proteinase                                                                                                 | 1           | Cloud     | 
+
+:::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+:::::::::::::::::::::::::::::::::::::::: keypoints
+
+- The Bidirectional Best-Hit algorithm groups sequences together into families according to the E-value.
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+

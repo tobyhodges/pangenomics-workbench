@@ -1,6 +1,5 @@
 Zenodo link:  [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7620503.svg)](https://doi.org/10.5281/zenodo.7620503)
 
-
 # Pangenome Analysis in Prokaryotes Lesson
 
 This lesson is part of the [Pangenomics Workshop](https://czirion.github.io/pangenomics-workshop/).
@@ -13,28 +12,29 @@ Make a suggestion or correct an error by [raising an Issue](https://github.com/p
 
 ## Code of Conduct
 
-All participants should agree to abide by the [Data Carpentry Code of Conduct](http://www.datacarpentry.org/code-of-conduct/).
+All participants should agree to abide by the [Data Carpentry Code of Conduct](https://www.datacarpentry.org/code-of-conduct/).
 
 ## Maintainer(s)
- 
+
 Current maintainers of this lesson are
- 
-* [Nelly Selem Mojica](https://github.com/nselem)
-* [Claudia Zirion Martinez](https://github.com/Czirion)
-* [Shaday Guerrero Flores](https://github.com/shadayguerrero)
-* [Jose Abel Lovaco Flores](https://github.com/fabel134)
-* [Paulina Mayell Mejía Ponce](https://github.com/paumayell)
-* [Haydeé Peruyero](https://github.com/HaydeePeruyero)
-* [Marisol Navarro Miranda](https://github.com/solnavss)
-* [Úrsula Abad](https://github.com/aursula)
+
+- [Nelly Selem Mojica](https://github.com/nselem)
+- [Claudia Zirion Martinez](https://github.com/Czirion)
+- [Shaday Guerrero Flores](https://github.com/shadayguerrero)
+- [Jose Abel Lovaco Flores](https://github.com/fabel134)
+- [Paulina Mayell Mejía Ponce](https://github.com/paumayell)
+- [Haydeé Peruyero](https://github.com/HaydeePeruyero)
+- [Marisol Navarro Miranda](https://github.com/solnavss)
+- [Úrsula Abad](https://github.com/aursula)
 
 ## Authors
 
-A list of contributors to the lesson can be found in [AUTHORS](AUTHORS) 
+A list of contributors to the lesson can be found in <AUTHORS>
 
 ## Citation
 
 Please cite as:
 
-FIXME 💢
+FIXME
+
 
