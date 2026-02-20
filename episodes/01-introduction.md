@@ -32,7 +32,7 @@ The term "pangenome" is a fusion of the Greek words *pan*, which means 'whole', 
 
 Do you feel confused about what a pangenome is? Look at this analogy!
 
-:::::::::::::::  solution
+:::::::::::::::  spoiler
 
 ## Solution
 
@@ -58,7 +58,7 @@ The pangenome consists of two primary components or partitions: core genome and 
 
 What are the partitions in your pizza pangenome?
 
-:::::::::::::::  solution
+:::::::::::::::  spolier
 
 ## Solution
 
@@ -87,7 +87,7 @@ The size of a pangenome can be influenced by factors such as the extent of gene 
 
 Considering a human lung pathogen and a soil bacterium, which one do you believe is more likely to have a closed pangenome, characterized by a relatively stable gene pool, and why?
 
-:::::::::::::::  solution
+:::::::::::::::  spoiler
 
 ## Solution
 

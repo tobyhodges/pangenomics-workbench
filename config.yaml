@@ -20,7 +20,7 @@ carpentry: 'incubator'
 title: 'Pangenome Analysis in Prokaryotes'
 
 # Date the lesson was created (YYYY-MM-DD, this is empty by default)
-created: 
+created: 2021-06-29
 
 # Comma-separated list of keywords for the lesson
 keywords: 'software, data, lesson, The Carpentries'

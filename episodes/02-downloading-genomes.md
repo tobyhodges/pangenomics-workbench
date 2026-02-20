@@ -537,7 +537,7 @@ available for all the *Streptococcus* genera.
 
 **Bonus**: Make a file with the output of your search.
 
-:::::::::::::::  solution
+:::::::::::::::  spoiler
 
 ## Solution
 

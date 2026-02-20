@@ -287,15 +287,15 @@ obtained from them.
 
 The U-shaped plot is a bar chart where you can see how many gene families (y-axis) are in how many genomes (x-axis). They are colored according to the
 partition they belong to.
-<a href="../fig/01-06-02.png">
-<img src="../fig/01-06-02.png" width="960" height="438" alt="Bar graph depicting the gene family frequency distribution, represented by a U-shaped plot. The number of organisms is plotted in the x-axis and the number of gene families in the y axis." />
+<a href="fig/01-06-02.png">
+<img src="fig/01-06-02.png" width="960" height="438" alt="Bar graph depicting the gene family frequency distribution, represented by a U-shaped plot. The number of organisms is plotted in the x-axis and the number of gene families in the y axis." />
 
 - **Tile plot**
 
 The tile plot is a presence/absence heatmap of the gene families (y-axis) in each genome (x-axis) ordered by hierarchical clustering and showing the
 multicopy families.
-<a href="../fig/01-06-03.png">
-<img src="../fig/01-06-03.png" width="956.5" height="453.5" alt="Tile plot displaying the gene families present within six strains of Streptococcus agalactiae, including the cloud gene families" />
+<a href="fig/01-06-03.png">
+<img src="fig/01-06-03.png" width="956.5" height="453.5" alt="Tile plot displaying the gene families present within six strains of Streptococcus agalactiae, including the cloud gene families" />
 
 :::::::::::::::::::::::::::::::::::::::::  callout
 

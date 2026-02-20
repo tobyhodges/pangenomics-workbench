@@ -201,7 +201,7 @@ gene in our biggest genome A909.
 
 Can the BBH algorithm make gene families that have more than one gene from the same genome?
 
-:::::::::::::::  solution
+:::::::::::::::  spoiler
 
 ## Solution
 
