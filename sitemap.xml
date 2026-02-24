@@ -37,10 +37,16 @@
     <loc>https://carpentries-incubator.github.io/pangenomics/LICENSE.html</loc>
   </url>
   <url>
+    <loc>https://carpentries-incubator.github.io/pangenomics/aio.html</loc>
+  </url>
+  <url>
     <loc>https://carpentries-incubator.github.io/pangenomics/data.html</loc>
   </url>
   <url>
     <loc>https://carpentries-incubator.github.io/pangenomics/discuss.html</loc>
+  </url>
+  <url>
+    <loc>https://carpentries-incubator.github.io/pangenomics/images.html</loc>
   </url>
   <url>
     <loc>https://carpentries-incubator.github.io/pangenomics/index.html</loc>
@@ -82,19 +88,37 @@
     <loc>https://carpentries-incubator.github.io/pangenomics/instructor/LICENSE.html</loc>
   </url>
   <url>
+    <loc>https://carpentries-incubator.github.io/pangenomics/instructor/aio.html</loc>
+  </url>
+  <url>
     <loc>https://carpentries-incubator.github.io/pangenomics/instructor/data.html</loc>
   </url>
   <url>
     <loc>https://carpentries-incubator.github.io/pangenomics/instructor/discuss.html</loc>
   </url>
   <url>
+    <loc>https://carpentries-incubator.github.io/pangenomics/instructor/images.html</loc>
+  </url>
+  <url>
     <loc>https://carpentries-incubator.github.io/pangenomics/instructor/index.html</loc>
+  </url>
+  <url>
+    <loc>https://carpentries-incubator.github.io/pangenomics/instructor/instructor-notes.html</loc>
+  </url>
+  <url>
+    <loc>https://carpentries-incubator.github.io/pangenomics/instructor/key-points.html</loc>
   </url>
   <url>
     <loc>https://carpentries-incubator.github.io/pangenomics/instructor/profiles.html</loc>
   </url>
   <url>
     <loc>https://carpentries-incubator.github.io/pangenomics/instructor/reference.html</loc>
+  </url>
+  <url>
+    <loc>https://carpentries-incubator.github.io/pangenomics/instructor-notes.html</loc>
+  </url>
+  <url>
+    <loc>https://carpentries-incubator.github.io/pangenomics/key-points.html</loc>
   </url>
   <url>
     <loc>https://carpentries-incubator.github.io/pangenomics/profiles.html</loc>
