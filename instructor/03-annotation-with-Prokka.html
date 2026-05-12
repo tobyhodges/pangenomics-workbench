@@ -568,7 +568,7 @@ ends.<br></li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: lower-alpha"><li>FALSE. Prokka successfully identifies non-coding sequences and
 doesn’t translate them. Instead, it provides alternative information
@@ -802,7 +802,7 @@ the features but in a different format.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>First inspect a <code>gff</code> file to see what you are working
 with. Open it with <code>nano</code> and scroll through the file to see
@@ -1115,7 +1115,7 @@ resistance mechanism. Which one is the abundant?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
 <div class="accordion-body">
 <p>The resistance mechanism is the 16th column, so we should pass the
 number 16 to <code>cut -f</code>. The <code>tail +2</code> part simply
@@ -1199,7 +1199,7 @@ so that already processed files are skipped?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
   <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
 </button>
-<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
+<div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
 <div class="accordion-body">
 <p>Because <code>TettelinList.txt</code> only stores strains, we must
 write the complete name by appending <code>agalactiae_</code> before the
@@ -1407,7 +1407,7 @@ elements.</li>
   "identifier": "https://carpentries-incubator.github.io/pangenomics/instructor/03-annotation-with-Prokka.html",
   "dateCreated": "2021-06-29",
   "dateModified": "2026-02-20",
-  "datePublished": "2026-05-05"
+  "datePublished": "2026-05-12"
 }
 
   </script><script>
